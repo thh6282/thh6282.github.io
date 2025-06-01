@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Chữ rơi và dải ngân hà</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: black;
+      font-family: 'Arial', sans-serif;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .falling-text {
+      position: absolute;
+      color: #66ffff;
+      font-size: 18px;
+      white-space: nowrap;
+      text-shadow:
+        0 0 5px #66ffff,
+        0 0 15px #66ffff,
+        0 0 25px #66ffff,
+        2px 2px 8px rgba(0, 255, 255, 0.3);
+      will-change: transform, opacity;
+      pointer-events: none;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="galaxy"></canvas>
+
+<script>
+  // ⭐ Dải ngân hà lấp lánh
+  const canvas = document.getElementById("galaxy");
+  const ctx = canvas.getContext("2d");
+  let w = canvas.width = window.innerWidth;
+  let h = canvas.height = window.innerHeight;
+
+  let stars = Array.from({ length: 200 }, () => ({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: Math.random() * 1.5 + 0.5,
+    alpha: Math.random(),
+    dAlpha: 0.005 + Math.random() * 0.01
+  }));
+
+  function drawStars() {
+    ctx.clearRect(0, 0, w, h);
+    for (let star of stars) {
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.r, 0, 2 * Math.PI);
+      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+      ctx.fill();
+      star.alpha += star.dAlpha;
+      if (star.alpha >= 1 || star.alpha <= 0) star.dAlpha *= -1;
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener("resize", () => {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  });
+
+  drawStars();
+</script>
+
+<script>
+  // ❄ Chữ rơi có bóng mờ, mờ dần theo độ sâu
+  const messages = [
+    "Chúc 1/6 thật vui vẻ nhé",
+    "Ngập tràn tiếng cười như một cô bé nhỏ!",
+    "Luôn xinh đẹp, vui tươi, hồn nhiên",
+    "✨", "🌟", "❄", "🍭"
+  ];
+
+  function createFallingText() {
+    const text = document.createElement('div');
+    text.className = 'falling-text';
+    text.textContent = messages[Math.floor(Math.random() * messages.length)];
+
+    const x = Math.random() * window.innerWidth;
+    const z = Math.random(); // độ sâu
+    const duration = 2.5 + Math.random() * 2;
+    const fontSize = 16 + Math.random() * 10;
+    const baseOpacity = 1 - z * 0.5;
+
+    text.style.left = `${x}px`;
+    text.style.top = `-50px`;
+    text.style.fontSize = `${fontSize}px`;
+    text.style.opacity = 0;
+
+    document.body.appendChild(text);
+
+    let start = null;
+    function animate(time) {
+      if (!start) start = time;
+      const progress = (time - start) / (duration * 1000);
+      if (progress < 1) {
+        const y = progress * window.innerHeight;
+        const opacity = progress < 0.1
+          ? baseOpacity * progress * 10
+          : progress > 0.9
+            ? baseOpacity * (1 - progress) * 10
+            : baseOpacity;
+        text.style.transform = `translateY(${y}px)`;
+        text.style.opacity = opacity;
+        requestAnimationFrame(animate);
+      } else {
+        text.remove();
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  setInterval(createFallingText, 60);
+</script>
+
+</body>
+</html>
