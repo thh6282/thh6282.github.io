@@ -11,6 +11,7 @@
       overflow: hidden;
       background: black;
       font-family: 'Arial', sans-serif;
+      perspective: 1000px;
     }
 
     canvas {
@@ -20,10 +21,18 @@
       z-index: 0;
     }
 
+    .wrapper {
+      width: 100vw;
+      height: 100vh;
+      transform-style: preserve-3d;
+      position: relative;
+      transition: transform 0.1s linear;
+      z-index: 1;
+    }
+
     .falling-text {
       position: absolute;
       color: #66ffff;
-      font-size: 18px;
       white-space: nowrap;
       text-shadow:
         0 0 5px #66ffff,
@@ -32,16 +41,33 @@
         2px 2px 8px rgba(0, 255, 255, 0.3);
       will-change: transform, opacity;
       pointer-events: none;
-      z-index: 1;
+      z-index: 2;
+      transform-style: preserve-3d;
+    }
+
+    .floating-message {
+      position: absolute;
+      color: #66ffff;
+      font-size: 20px;
+      pointer-events: none;
+      opacity: 0.2; /* rất mờ */
+      transition: opacity 1.5s ease, transform 1.5s ease;
+      text-shadow:
+        0 0 5px #66ffff,
+        0 0 15px #66ffff,
+        0 0 25px #66ffff,
+        2px 2px 8px rgba(0, 255, 255, 0.3);
+      z-index: 0; /* dưới tất cả */
+      transform-style: preserve-3d;
     }
   </style>
 </head>
 <body>
 
 <canvas id="galaxy"></canvas>
+<div class="wrapper" id="wrapper3D"></div>
 
 <script>
-  // ⭐ Dải ngân hà lấp lánh
   const canvas = document.getElementById("galaxy");
   const ctx = canvas.getContext("2d");
   let w = canvas.width = window.innerWidth;
@@ -77,13 +103,14 @@
 </script>
 
 <script>
-  // ❄ Chữ rơi có bóng mờ, mờ dần theo độ sâu
   const messages = [
     "Chúc 1/6 thật vui vẻ nhé!",
     "Ngập tràn tiếng cười như một cô bé nhỏ!",
-    "Luôn xinh đẹp, vui tươi, hồn nhiên",
+    "Luôn xinh tươi, vui vẻ, hồn nhiên",
     "✨", "🌟", "❄", "🍭"
   ];
+
+  const wrapper = document.getElementById('wrapper3D');
 
   function createFallingText() {
     const text = document.createElement('div');
@@ -91,30 +118,30 @@
     text.textContent = messages[Math.floor(Math.random() * messages.length)];
 
     const x = Math.random() * window.innerWidth;
-    const z = Math.random(); // độ sâu
-    const duration = 2.5 + Math.random() * 2;
-    const fontSize = 16 + Math.random() * 10;
-    const baseOpacity = 1 - z * 0.5;
+    const z = Math.random() * 600 - 300;
+    const yStart = -100;
+    const yEnd = window.innerHeight + 100;
+    const duration = 4 + Math.random() * 2;
 
+    const scale = 1 - Math.abs(z) / 1000;
+    text.style.fontSize = `${16 * scale + 10}px`;
     text.style.left = `${x}px`;
-    text.style.top = `-50px`;
-    text.style.fontSize = `${fontSize}px`;
+    text.style.top = `0px`;
     text.style.opacity = 0;
 
-    document.body.appendChild(text);
+    wrapper.appendChild(text);
 
-    let start = null;
+    let startTime = null;
+
     function animate(time) {
-      if (!start) start = time;
-      const progress = (time - start) / (duration * 1000);
+      if (!startTime) startTime = time;
+      const elapsed = (time - startTime) / 1000;
+      const progress = elapsed / duration;
+
       if (progress < 1) {
-        const y = progress * window.innerHeight;
-        const opacity = progress < 0.1
-          ? baseOpacity * progress * 10
-          : progress > 0.9
-            ? baseOpacity * (1 - progress) * 10
-            : baseOpacity;
-        text.style.transform = `translateY(${y}px)`;
+        const y = yStart + (yEnd - yStart) * progress;
+        const opacity = 1 - progress;
+        text.style.transform = `translateZ(${z}px) translateY(${y}px) scale(${scale})`;
         text.style.opacity = opacity;
         requestAnimationFrame(animate);
       } else {
@@ -125,20 +152,109 @@
     requestAnimationFrame(animate);
   }
 
-  setInterval(createFallingText, 60);
+  setInterval(createFallingText, 40);
 </script>
 
+<script>
+  const wrapper3D = document.getElementById('wrapper3D');
+  let isDragging = false;
+  let lastX = 0;
+  let lastY = 0;
+  let rotateX = 0;
+  let rotateY = 0;
 
-<audio id="bg-music" autoplay loop>
+  document.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+  });
+
+  document.addEventListener('mouseup', () => isDragging = false);
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - lastX;
+    const deltaY = e.clientY - lastY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    rotateY += deltaX * 0.3;
+    rotateX -= deltaY * 0.3;
+    wrapper3D.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  });
+
+  document.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    const touch = e.touches[0];
+    lastX = touch.clientX;
+    lastY = touch.clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => isDragging = false);
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - lastX;
+    const deltaY = touch.clientY - lastY;
+    lastX = touch.clientX;
+    lastY = touch.clientY;
+    rotateY += deltaX * 0.3;
+    rotateX -= deltaY * 0.3;
+    wrapper3D.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  }, { passive: true });
+</script>
+
+<script>
+  const floatingMessages = [
+    'Vui tươi và hồn nhiên', 'Ngập tràn tiếng cười',
+    'Luôn xinh tươi', 'Như một cô bé nhỏ', 'tận hưởng ngày tuyệt vời', 'Minh Châu'
+  ];
+
+  function showFloatingMessages() {
+    const count = 3 + Math.floor(Math.random() * 3); // 3–5 chữ một lần
+    for (let i = 0; i < count; i++) {
+      const msg = document.createElement('div');
+      msg.className = 'floating-message';
+      msg.textContent = floatingMessages[Math.floor(Math.random() * floatingMessages.length)];
+
+      const x = Math.random() * window.innerWidth;
+      const y = Math.random() * window.innerHeight;
+      const z = Math.random() * 300 - 150;
+
+      msg.style.left = `${x}px`;
+      msg.style.top = `${y}px`;
+      msg.style.transform = `translateZ(${z}px)`;
+
+      document.getElementById('wrapper3D').appendChild(msg);
+
+      setTimeout(() => {
+        msg.style.opacity = 0;
+        msg.style.transform += ' scale(1.5)';
+      }, 50);
+
+      setTimeout(() => {
+        msg.remove();
+      }, 2000);
+    }
+  }
+
+  setInterval(showFloatingMessages, 1500); // xuất hiện chậm hơn
+</script>
+
+<audio id="bg-music" autoplay loop muted>
   <source src="hs.mp3" type="audio/mpeg">
   Trình duyệt của bạn không hỗ trợ phát âm thanh.
 </audio>
 
 <script>
   const music = document.getElementById('bg-music');
-  document.body.addEventListener('click', () => {
-    music.play().catch(() => {});
-  }, { once: true });
+  music.play().then(() => {
+    setTimeout(() => {
+      music.muted = false;
+    }, 1000);
+  }).catch(() => {
+    console.warn("Autoplay bị chặn.");
+  });
 </script>
 
 </body>
