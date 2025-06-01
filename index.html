@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>CHÚC MỪNG NGÀY QUỐC TẾ THIẾU NHI NHA</title>
+  <title>CHÚc Mừng Ngày Quốc Tế Thiếu Nhi Nha</title>
   <style>
     html, body {
       margin: 0;
@@ -50,14 +50,14 @@
       color: #66ffff;
       font-size: 20px;
       pointer-events: none;
-      opacity: 0.2; /* rất mờ */
+      opacity: 0.2;
       transition: opacity 1.5s ease, transform 1.5s ease;
       text-shadow:
         0 0 5px #66ffff,
         0 0 15px #66ffff,
         0 0 25px #66ffff,
         2px 2px 8px rgba(0, 255, 255, 0.3);
-      z-index: 0; /* dưới tất cả */
+      z-index: 0;
       transform-style: preserve-3d;
     }
   </style>
@@ -106,7 +106,7 @@
   const messages = [
     "Chúc 1/6 thật vui vẻ nhé!",
     "Ngập tràn tiếng cười như một cô bé nhỏ!",
-    "Luôn xinh tươi, vui vẻ, hồn nhiên",
+    "Luôn xinh đẹp, vui tươi, hồn nhiên",
     "✨", "🌟", "❄", "🍭"
   ];
 
@@ -158,28 +158,39 @@
 <script>
   const wrapper3D = document.getElementById('wrapper3D');
   let isDragging = false;
-  let lastX = 0;
-  let lastY = 0;
-  let rotateX = 0;
-  let rotateY = 0;
+  let lastX = 0, lastY = 0;
+  let rotateX = 0, rotateY = 0;
+  let targetRotateX = 0, targetRotateY = 0;
+  let animationFrame;
+
+  function updateTransform() {
+    rotateX += (targetRotateX - rotateX) * 0.2;
+    rotateY += (targetRotateY - rotateY) * 0.2;
+    wrapper3D.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    animationFrame = requestAnimationFrame(updateTransform);
+  }
 
   document.addEventListener('mousedown', (e) => {
     isDragging = true;
     lastX = e.clientX;
     lastY = e.clientY;
+    cancelAnimationFrame(animationFrame);
+    animationFrame = requestAnimationFrame(updateTransform);
   });
 
-  document.addEventListener('mouseup', () => isDragging = false);
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    cancelAnimationFrame(animationFrame);
+  });
 
   document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    const deltaX = e.clientX - lastX;
-    const deltaY = e.clientY - lastY;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
     lastX = e.clientX;
     lastY = e.clientY;
-    rotateY += deltaX * 0.3;
-    rotateX -= deltaY * 0.3;
-    wrapper3D.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    targetRotateY += dx * 0.3;
+    targetRotateX -= dy * 0.3;
   });
 
   document.addEventListener('touchstart', (e) => {
@@ -187,31 +198,35 @@
     const touch = e.touches[0];
     lastX = touch.clientX;
     lastY = touch.clientY;
+    cancelAnimationFrame(animationFrame);
+    animationFrame = requestAnimationFrame(updateTransform);
   }, { passive: true });
 
-  document.addEventListener('touchend', () => isDragging = false);
+  document.addEventListener('touchend', () => {
+    isDragging = false;
+    cancelAnimationFrame(animationFrame);
+  });
 
   document.addEventListener('touchmove', (e) => {
     if (!isDragging) return;
     const touch = e.touches[0];
-    const deltaX = touch.clientX - lastX;
-    const deltaY = touch.clientY - lastY;
+    const dx = touch.clientX - lastX;
+    const dy = touch.clientY - lastY;
     lastX = touch.clientX;
     lastY = touch.clientY;
-    rotateY += deltaX * 0.3;
-    rotateX -= deltaY * 0.3;
-    wrapper3D.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    targetRotateY += dx * 0.3;
+    targetRotateX -= dy * 0.3;
   }, { passive: true });
 </script>
 
 <script>
   const floatingMessages = [
-    'Vui tươi và hồn nhiên', 'Ngập tràn tiếng cười',
-    'Luôn xinh tươi', 'Như một cô bé nhỏ', 'Ngày tuyệt vời', 'Minh Châu'
+    'Vui tươi và hồn nhiên', 'Ngập tràn tiếng cười mỗi ngày',
+    'Luôn xinh đẹp', 'Ngày tuyệt vời như một cô bé nhỏ', 'Minh Châu'
   ];
 
   function showFloatingMessages() {
-    const count = 3 + Math.floor(Math.random() * 3); // 3–5 chữ một lần
+    const count = 3 + Math.floor(Math.random() * 3);
     for (let i = 0; i < count; i++) {
       const msg = document.createElement('div');
       msg.className = 'floating-message';
@@ -238,7 +253,7 @@
     }
   }
 
-  setInterval(showFloatingMessages, 1500); // xuất hiện chậm hơn
+  setInterval(showFloatingMessages, 1500);
 </script>
 
 <audio id="bg-music" autoplay loop muted>
