@@ -60,26 +60,10 @@
       z-index: 0;
       transform-style: preserve-3d;
     }
-
-    #start-btn {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 9999;
-      padding: 10px 20px;
-      font-size: 18px;
-      background-color: #00cccc;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 0 10px #00ffff;
-    }
   </style>
 </head>
 <body>
 
-<button id="start-btn">Bắt đầu</button>
 <canvas id="galaxy"></canvas>
 <div class="wrapper" id="wrapper3D"></div>
 
@@ -254,15 +238,16 @@
 
 <script>
   const music = document.getElementById('bg-music');
-  const startBtn = document.getElementById('start-btn');
 
-  startBtn.addEventListener('click', () => {
+  function tryPlayMusic() {
     music.muted = false;
     music.play().catch(err => {
       console.warn("Không thể phát nhạc:", err);
     });
-    startBtn.remove(); // Ẩn nút
-  });
+    document.removeEventListener('click', tryPlayMusic);
+  }
+
+  document.addEventListener('click', tryPlayMusic);
 </script>
 
 </body>
