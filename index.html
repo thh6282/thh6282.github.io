@@ -129,20 +129,16 @@
 </script>
 
 
-<audio id="bg-music" autoplay loop muted>
+<audio id="bg-music" autoplay loop>
   <source src="hs.mp3" type="audio/mpeg">
   Trình duyệt của bạn không hỗ trợ phát âm thanh.
 </audio>
 
 <script>
   const music = document.getElementById('bg-music');
-  music.play().then(() => {
-    setTimeout(() => {
-      music.muted = false;
-    }, 1000);
-  }).catch(() => {
-    console.warn("Autoplay bị chặn.");
-  });
+  document.body.addEventListener('click', () => {
+    music.play().catch(() => {});
+  }, { once: true });
 </script>
 
 </body>
