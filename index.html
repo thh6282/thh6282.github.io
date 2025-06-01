@@ -61,16 +61,16 @@
       transform-style: preserve-3d;
     }
 
-    #start-music {
-      position: absolute;
+    #start-btn {
+      position: fixed;
       top: 20px;
       left: 20px;
       z-index: 9999;
       padding: 10px 20px;
-      font-size: 16px;
+      font-size: 18px;
       background-color: #00cccc;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       color: white;
       cursor: pointer;
       box-shadow: 0 0 10px #00ffff;
@@ -79,12 +79,11 @@
 </head>
 <body>
 
-<button id="start-music">Bấm để bắt đầu</button>
-
+<button id="start-btn">Bắt đầu</button>
 <canvas id="galaxy"></canvas>
 <div class="wrapper" id="wrapper3D"></div>
 
-<audio id="bg-music" autoplay loop>
+<audio id="bg-music" loop>
   <source src="hs.mp3" type="audio/mpeg">
   Trình duyệt của bạn không hỗ trợ phát âm thanh.
 </audio>
@@ -126,10 +125,10 @@
 
 <script>
   const messages = [
-    "Chúc 1/6 thật vui vẻ nhé bé Cá!",
+    "Chúc 1/6 thật vui vẻ nhé!",
     "Ngập tràn tiếng cười như một cô bé nhỏ!",
-    "Luôn xinh tươi, vui vẻ, hồn nhiên",
-    "✨", "🐆", "❄", "🍭"
+    "Luôn xinh đẹp, vui tươi, hồn nhiên",
+    "✨", "🌟", "❄", "🍭"
   ];
 
   const wrapper = document.getElementById('wrapper3D');
@@ -180,56 +179,46 @@
 <script>
   const wrapper3D = document.getElementById('wrapper3D');
   let isDragging = false;
-  let lastX = 0;
-  let lastY = 0;
-  let rotateX = 0;
-  let rotateY = 0;
+  let lastX = 0, lastY = 0;
+  let rotateX = 0, rotateY = 0;
+  let targetRotateX = 0, targetRotateY = 0;
+  let animationFrame;
+
+  function updateTransform() {
+    rotateX += (targetRotateX - rotateX) * 0.2;
+    rotateY += (targetRotateY - rotateY) * 0.2;
+    wrapper3D.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    animationFrame = requestAnimationFrame(updateTransform);
+  }
 
   document.addEventListener('mousedown', (e) => {
     isDragging = true;
     lastX = e.clientX;
     lastY = e.clientY;
+    cancelAnimationFrame(animationFrame);
+    animationFrame = requestAnimationFrame(updateTransform);
   });
 
-  document.addEventListener('mouseup', () => isDragging = false);
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    cancelAnimationFrame(animationFrame);
+  });
 
   document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    const deltaX = e.clientX - lastX;
-    const deltaY = e.clientY - lastY;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
     lastX = e.clientX;
     lastY = e.clientY;
-    rotateY += deltaX * 0.3;
-    rotateX -= deltaY * 0.3;
-    wrapper3D.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    targetRotateY += dx * 0.3;
+    targetRotateX -= dy * 0.3;
   });
-
-  document.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    const touch = e.touches[0];
-    lastX = touch.clientX;
-    lastY = touch.clientY;
-  }, { passive: true });
-
-  document.addEventListener('touchend', () => isDragging = false);
-
-  document.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - lastX;
-    const deltaY = touch.clientY - lastY;
-    lastX = touch.clientX;
-    lastY = touch.clientY;
-    rotateY += deltaX * 0.3;
-    rotateX -= deltaY * 0.3;
-    wrapper3D.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-  }, { passive: true });
 </script>
 
 <script>
   const floatingMessages = [
-    'Vui tươi và hồn nhiên', 'Ngập tràn tiếng cười',
-    'Luôn xinh tươi', 'Như một cô bé nhỏ', 'Ngày tuyệt vời', 'Minh Châu'
+    'Vui tươi và hồn nhiên', 'Ngập tràn tiếng cười mỗi ngày',
+    'Luôn xinh đẹp', 'Ngày tuyệt vời như một cô bé nhỏ', 'Minh Châu'
   ];
 
   function showFloatingMessages() {
@@ -264,10 +253,15 @@
 </script>
 
 <script>
-  document.getElementById('start-music').addEventListener('click', () => {
-    const music = document.getElementById('bg-music');
-    music.play().catch(err => console.warn('Không thể phát nhạc:', err));
-    document.getElementById('start-music').remove();
+  const music = document.getElementById('bg-music');
+  const startBtn = document.getElementById('start-btn');
+
+  startBtn.addEventListener('click', () => {
+    music.muted = false;
+    music.play().catch(err => {
+      console.warn("Không thể phát nhạc:", err);
+    });
+    startBtn.remove(); // Ẩn nút
   });
 </script>
 
