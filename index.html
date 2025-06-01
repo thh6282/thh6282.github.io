@@ -50,22 +50,44 @@
       color: #66ffff;
       font-size: 20px;
       pointer-events: none;
-      opacity: 0.2; /* rất mờ */
+      opacity: 0.2;
       transition: opacity 1.5s ease, transform 1.5s ease;
       text-shadow:
         0 0 5px #66ffff,
         0 0 15px #66ffff,
         0 0 25px #66ffff,
         2px 2px 8px rgba(0, 255, 255, 0.3);
-      z-index: 0; /* dưới tất cả */
+      z-index: 0;
       transform-style: preserve-3d;
+    }
+
+    #start-music {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #00cccc;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00ffff;
     }
   </style>
 </head>
 <body>
 
+<button id="start-music">Bấm để bắt đầu</button>
+
 <canvas id="galaxy"></canvas>
 <div class="wrapper" id="wrapper3D"></div>
+
+<audio id="bg-music" autoplay loop>
+  <source src="hs.mp3" type="audio/mpeg">
+  Trình duyệt của bạn không hỗ trợ phát âm thanh.
+</audio>
 
 <script>
   const canvas = document.getElementById("galaxy");
@@ -104,7 +126,7 @@
 
 <script>
   const messages = [
-    "Chúc 1/6 thật vui vẻ nhé!",
+    "Chúc 1/6 thật vui vẻ nhé bé Cá!",
     "Ngập tràn tiếng cười như một cô bé nhỏ!",
     "Luôn xinh tươi, vui vẻ, hồn nhiên",
     "✨", "🐆", "❄", "🍭"
@@ -211,7 +233,7 @@
   ];
 
   function showFloatingMessages() {
-    const count = 3 + Math.floor(Math.random() * 3); // 3–5 chữ một lần
+    const count = 3 + Math.floor(Math.random() * 3);
     for (let i = 0; i < count; i++) {
       const msg = document.createElement('div');
       msg.className = 'floating-message';
@@ -238,22 +260,14 @@
     }
   }
 
-  setInterval(showFloatingMessages, 1500); // xuất hiện chậm hơn
+  setInterval(showFloatingMessages, 1500);
 </script>
 
-<audio id="bg-music" autoplay loop muted>
-  <source src="hs.mp3" type="audio/mpeg">
-  Trình duyệt của bạn không hỗ trợ phát âm thanh.
-</audio>
-
 <script>
-  const music = document.getElementById('bg-music');
-  music.play().then(() => {
-    setTimeout(() => {
-      music.muted = false;
-    }, 1000);
-  }).catch(() => {
-    console.warn("Autoplay bị chặn.");
+  document.getElementById('start-music').addEventListener('click', () => {
+    const music = document.getElementById('bg-music');
+    music.play().catch(err => console.warn('Không thể phát nhạc:', err));
+    document.getElementById('start-music').remove();
   });
 </script>
 
