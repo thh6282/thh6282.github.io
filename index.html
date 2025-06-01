@@ -60,12 +60,33 @@
       z-index: 0;
       transform-style: preserve-3d;
     }
+
+    #start-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 9999;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #00cccc;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00ffff;
+    }
   </style>
 </head>
 <body>
 
+<button id="start-btn">Bắt đầu</button>
 <canvas id="galaxy"></canvas>
 <div class="wrapper" id="wrapper3D"></div>
+
+<audio id="bg-music" loop>
+  <source src="hs.mp3" type="audio/mpeg">
+  Trình duyệt của bạn không hỗ trợ phát âm thanh.
+</audio>
 
 <script>
   const canvas = document.getElementById("galaxy");
@@ -192,31 +213,6 @@
     targetRotateY += dx * 0.3;
     targetRotateX -= dy * 0.3;
   });
-
-  document.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    const touch = e.touches[0];
-    lastX = touch.clientX;
-    lastY = touch.clientY;
-    cancelAnimationFrame(animationFrame);
-    animationFrame = requestAnimationFrame(updateTransform);
-  }, { passive: true });
-
-  document.addEventListener('touchend', () => {
-    isDragging = false;
-    cancelAnimationFrame(animationFrame);
-  });
-
-  document.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-    const touch = e.touches[0];
-    const dx = touch.clientX - lastX;
-    const dy = touch.clientY - lastY;
-    lastX = touch.clientX;
-    lastY = touch.clientY;
-    targetRotateY += dx * 0.3;
-    targetRotateX -= dy * 0.3;
-  }, { passive: true });
 </script>
 
 <script>
@@ -256,19 +252,16 @@
   setInterval(showFloatingMessages, 1500);
 </script>
 
-<audio id="bg-music" autoplay loop muted>
-  <source src="hs.mp3" type="audio/mpeg">
-  Trình duyệt của bạn không hỗ trợ phát âm thanh.
-</audio>
-
 <script>
   const music = document.getElementById('bg-music');
-  music.play().then(() => {
-    setTimeout(() => {
-      music.muted = false;
-    }, 1000);
-  }).catch(() => {
-    console.warn("Autoplay bị chặn.");
+  const startBtn = document.getElementById('start-btn');
+
+  startBtn.addEventListener('click', () => {
+    music.muted = false;
+    music.play().catch(err => {
+      console.warn("Không thể phát nhạc:", err);
+    });
+    startBtn.remove(); // Ẩn nút
   });
 </script>
 
